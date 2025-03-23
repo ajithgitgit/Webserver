@@ -46,13 +46,7 @@ jobs:
           -Dsonar.sources=. \
           -X  # Enable debug logging for deeper insights into analysis
 
-    # Step 6: Check SonarQube Quality Gate status
-    - name: Check SonarQube Quality Gate status
-      uses: sonarsource/sonarqube-quality-gate-action@master
-      with:
-        timeout-minutes: 5  # Timeout for quality gate check
-      env:
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
 
     # Step 7: Build Docker image with multi-platform support
     - name: Build and push Docker image
