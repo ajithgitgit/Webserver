@@ -1,5 +1,9 @@
 name: CI/CD Pipeline with Security & Compliance
 
+# Set the permissions for the workflow
+permissions:
+  security-events: write  # Grant permission for security event uploads
+
 on:
   push:
     branches:
@@ -40,9 +44,9 @@ jobs:
         format: 'sarif'  # SARIF format for scan results
         output: 'trivy-results.sarif'  # Output file for the SARIF results
 
-    # Step 6: Upload Trivy SARIF Report
+    # Step 6: Upload Trivy SARIF Report (Using CodeQL Action v3)
     - name: Upload Trivy SARIF Report
-      uses: github/codeql-action/upload-sarif@v2
+      uses: github/codeql-action/upload-sarif@v3  # Updated to v3
       with:
         sarif_file: 'trivy-results.sarif'
 
@@ -52,7 +56,13 @@ jobs:
         sed -i "s|rtx3osie/myapp:PLACEHOLDER|rtx3osie/myapp:latest|" ./kube/deployment.yaml
         cat ./kube/deployment.yaml  # Debug: Print the YAML file to check image tag replacement
 
-
+    # Step 8: SonarQube analysis
+    - name: SonarQube Scan
+      uses: sonarsource/sonarcloud-github-action@v1
+      with:
+        sonar-token: ${{ secrets.SONAR_TOKEN }}  # SonarQube token stored in GitHub Secrets
+        sonar-project-key: your-project-key  # Replace with your SonarQube project key
+        sonar-project-name: "MyApp"  # Replace with your SonarQube project name
 
     # Step 9: Deploy to Kubernetes (if applicable, assume kubectl is set up)
     - name: Deploy to Kubernetes
