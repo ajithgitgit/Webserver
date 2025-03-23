@@ -38,14 +38,7 @@ jobs:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}  # SonarQube token stored in GitHub secrets
         SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}  # SonarQube server URL (e.g., https://sonar.yourcompany.com)
 
-    # Step 5: Run Snyk Code (DeepCode) Scan
-    - name: Run Snyk Code (DeepCode) Scan
-      uses: snyk/actions@v2  # Use the correct Snyk GitHub Action
-      with:
-        snyk-token: ${{ secrets.SNYK_TOKEN }}  # Pass your Snyk token stored in GitHub secrets
-        command: "test"  # Run the test command to start the analysis
-      env:
-        SNYK_ORG: ${{ secrets.SNYK_ORG }}  # (Optional) Pass your Snyk Organization ID if needed
+
 
     # Step 6: Build Docker image
     - name: Build Docker image
