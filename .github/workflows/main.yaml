@@ -60,11 +60,10 @@ jobs:
     - name: Run SonarQube Static Code Analysis
       uses: sonarsource/sonarcloud-github-action@v1
       with:
-        sonar-token: ${{ secrets.SONAR_TOKEN }}  # Your SonarQube token
-        sonar-project-key: webserve  # Replace with your SonarQube project key
-        sonar-project-name: "MyApp"  # Replace with your SonarQube project name
+        entryPoint: ./gradlew  # Adjust this to your build command (e.g., gradle, mvn, npm)
+        args: -Dsonar.projectKey=my-app -Dsonar.projectName="My App"  # Replace with your SonarQube project key and name
       env:
-        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}  # Your SonarQube instance URL
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}  # Your SonarQube token
+        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}  # Your SonarQube host URL
 
-    # Step 9: Deploy to Kubernetes (if applicable, assume kubectl is set up)
 
