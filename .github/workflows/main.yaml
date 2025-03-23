@@ -56,16 +56,15 @@ jobs:
         sed -i "s|rtx3osie/myapp:PLACEHOLDER|rtx3osie/myapp:latest|" ./kube/deployment.yaml
         cat ./kube/deployment.yaml  # Debug: Print the YAML file to check image tag replacement
 
-    # Step 8: SonarQube analysis
-    - name: SonarQube Scan
+    # Step 8: SonarQube Scan (Perform static code analysis)
+    - name: Run SonarQube Static Code Analysis
       uses: sonarsource/sonarcloud-github-action@v1
       with:
-        sonar-token: ${{ secrets.SONAR_TOKEN }}  # SonarQube token stored in GitHub Secrets
+        sonar-token: ${{ secrets.SONAR_TOKEN }}  # Your SonarQube token
         sonar-project-key: sqp_6fa7932a50306550d2bba277c7e4effc7f23f3b1  # Replace with your SonarQube project key
         sonar-project-name: "MyApp"  # Replace with your SonarQube project name
+      env:
+        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}  # Your SonarQube instance URL
 
     # Step 9: Deploy to Kubernetes (if applicable, assume kubectl is set up)
-    - name: Deploy to Kubernetes
-      run: |
-        kubectl apply -f ./kube/deployment.yaml
-        echo "Kubernetes deployment applied successfully."
+
