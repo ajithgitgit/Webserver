@@ -32,10 +32,31 @@ jobs:
         docker tag myapp:latest rtx3osie/myapp:latest  # Push image with 'latest' tag
         docker push rtx3osie/myapp:latest  # Push image to Docker Hub
 
-    # Step 5: Replace image tag in Deployment YAML with 'latest'
+    # Step 5: Run Trivy Docker image scan
+    - name: Run Trivy Docker scan
+      uses: aquasecurity/trivy-action@v0.3.0
+      with:
+        image: rtx3osie/myapp:latest  # Image to be scanned
+        format: 'table'  # Output format for scan results
+        severity: 'HIGH,CRITICAL'  # Filter results by severity (optional)
+        ignore-unfixed: true  # Ignore unfixed vulnerabilities (optional)
+
+    # Step 6: Replace image tag in Deployment YAML with 'latest'
     - name: Replace image tag in Deployment YAML
       run: |
         sed -i "s|rtx3osie/myapp:PLACEHOLDER|rtx3osie/myapp:latest|" ./kube/deployment.yaml
         cat ./kube/deployment.yaml  # Debug: Print the YAML file to check image tag replacement
 
- 
+    # Step 7: SonarQube analysis
+    - name: SonarQube Scan
+      uses: sonarsource/sonarcloud-github-action@v1
+      with:
+        sonar-token: ${{ secrets.SONAR_TOKEN }}  # SonarQube token stored in GitHub Secrets
+        sonar-project-key: your-project-key  # Replace with your SonarQube project key
+        sonar-project-name: "MyApp"  # Replace with your SonarQube project name
+
+    # Step 8: Deploy to Kubernetes (if applicable, assume kubectl is set up)
+    - name: Deploy to Kubernetes
+      run: |
+        kubectl apply -f ./kube/deployment.yaml
+        echo "Kubernetes deployment applied successfully."
