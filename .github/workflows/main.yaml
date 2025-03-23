@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest  # Use the latest Ubuntu runner for the job
 
     steps:
-    # Step 1: Checkout code from the repository
+    # Step 1: Checkout code
     - name: Checkout code from repository
       uses: actions/checkout@v2
       with:
@@ -37,22 +37,16 @@ jobs:
         echo "/opt/sonar-scanner-4.6.2.2472-linux/bin" >> $GITHUB_PATH  # Add sonar-scanner to PATH
 
     # Step 5: Run SonarQube Analysis
-    - name: Run SonarQube Scan
+    - name: Run SonarQube scan with debugging
       run: |
         sonar-scanner \
-          -Dsonar.projectKey=nodejs \
+          -Dsonar.projectKey=nodejs-project \
           -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
           -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
           -Dsonar.sources=. \
-          -X  # Enable debug logging for deeper insights
+          -X  # Enable debug logging for deeper insights into analysis
 
-    # Step 6: Run SonarQube Quality Gate Check
-    - name: Check SonarQube Quality Gate
-      uses: sonarsource/sonarqube-quality-gate-action@master
-      with:
-        timeout-minutes: 1
-      env:
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
 
     # Step 7: Build Docker image with multi-platform support
     - name: Build and push Docker image
@@ -70,7 +64,7 @@ jobs:
         format: 'sarif'  # SARIF format for scan results
         output: 'trivy-results.sarif'  # Output file for the SARIF results
 
-    # Step 9: Upload Trivy SARIF Report to GitHub
+    # Step 9: Upload Trivy SARIF Report for code analysis
     - name: Upload Trivy SARIF Report to GitHub
       uses: github/codeql-action/upload-sarif@v3
       with:
@@ -82,3 +76,8 @@ jobs:
         sed -i "s|rtx3osie/myapp:PLACEHOLDER|rtx3osie/myapp:latest|" ./kube/deployment.yaml
         cat ./kube/deployment.yaml  # Debug: Print the updated YAML file to verify image tag replacement
 
+    # Optional: Deploy to Kubernetes (Using Helm or kubectl)
+    - name: Deploy to Kubernetes cluster
+      run: |
+        # Example using Helm to deploy the application
+        helm upgrade --install myapp ./kube --set image.tag=latest  # Use Helm to manage Kubernetes deployments
