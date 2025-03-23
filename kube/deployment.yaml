@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: my-app
-  namespace: server  # Specify the namespace here
+  namespace: default  # Specify the namespace here
   labels:
     app: my-app
 spec:
@@ -17,6 +17,6 @@ spec:
     spec:
       containers:
         - name: my-app
-          image: rtx3osie/myapp:${GITHUB_SHA}  # Use the dynamically created image tag
+          image: rtx3osie/myapp:PLACEHOLDER  # Placeholder to be replaced by GitHub Actions
           ports:
             - containerPort: 3000
