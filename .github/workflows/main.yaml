@@ -28,15 +28,14 @@ jobs:
     - name: Install dependencies
       run: npm install  # Ensure dependencies are installed
 
-    # Step 4: Run SonarQube analysis
-    - name: SonarQube Scan
-      uses: sonarsource/sonarcloud-github-action@v1
+    # Step 4: Run Snyk Code (DeepCode) Scan
+    - name: Run Snyk Code (DeepCode) Scan
+      uses: snyk/actions/nodejs@master  # GitHub Action to run Snyk Code (DeepCode)
       with:
-        entryPoint: npm
-        args: run sonar  # Ensure you have a "sonar" script in package.json if running `npm run sonar`
+        snyk-token: ${{ secrets.SNYK_TOKEN }}  # Pass your Snyk token stored in GitHub secrets
+        command: "test"  # Run the test command to start the analysis
       env:
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        SNYK_ORG: ${{ secrets.SNYK_ORG }}  # (Optional) Pass your Snyk Organization ID if needed
 
     # Step 5: Build Docker image
     - name: Build Docker image
