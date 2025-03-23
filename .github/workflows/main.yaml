@@ -1,0 +1,78 @@
+name: CI/CD Pipeline with Security & Compliance
+
+on:
+  push:
+    branches:
+      - main  # Trigger pipeline when code is pushed to the 'main' branch
+
+jobs:
+  build_and_scan:
+    runs-on: ubuntu-latest  # Use the latest Ubuntu runner for the job
+
+    steps:
+    # Step 1: Checkout code
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    # Step 2: Set up Docker Buildx (to build multi-platform images)
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+
+    # Step 3: Log in to DockerHub
+    - name: Log in to DockerHub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}  # Store DockerHub username in GitHub Secrets
+        password: ${{ secrets.DOCKER_PASSWORD }}  # Store DockerHub password in GitHub Secrets
+
+    # Step 4: Install Trivy using the official install script
+    - name: Install Trivy
+      run: |
+        curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/master/contrib/install.sh | sh
+        # Add Trivy's installation directory to the PATH
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
+        # Verify Trivy installation
+        trivy --version
+
+    # Step 5: Build Docker image
+    - name: Build Docker image
+      run: |
+        docker build -t myapp:$GITHUB_SHA .
+        docker tag myapp:$GITHUB_SHA rtx3osie/myapp:$GITHUB_SHA
+        docker push rtx3osie/myapp:$GITHUB_SHA  # Push image to Docker Hub
+
+    # Step 6: Run Container Vulnerability Scanning (Trivy) if environment is 'prod'
+    - name: Run Trivy container scan
+      if: ${{ github.ref == 'refs/heads/main' }}  # You can modify this condition based on your environment logic
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: "rtx3osie/myapp:${{ github.sha }}"  # Use the correct image tag
+        format: "table"
+        exit-code: 1  # Fail the job if vulnerabilities are found
+        ignore-unfixed: true
+        severity: "CRITICAL,HIGH"
+
+    # Step 7: Set up AWS CLI (to interact with AWS services)
+    - name: Set up AWS CLI
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+
+    # Step 8: Install kubectl
+    - name: Install kubectl
+      uses: azure/setup-kubectl@v2.0
+      with:
+        version: 'v1.24.0' # default is latest stable
+      id: install
+
+    # Step 9: Set up kubeconfig for EKS
+    - name: Set up kubeconfig for EKS
+      run: |
+        aws eks update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }} --region ${{ secrets.AWS_REGION }}
+        
+    # Step 10: Helm Deploy to Kubernetes on EKS
+    - name: Helm Deploy to Kubernetes
+      run: |
+        helm upgrade --install myapp ./helm-chart --set image.tag=$GITHUB_SHA
