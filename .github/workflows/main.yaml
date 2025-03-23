@@ -36,15 +36,7 @@ jobs:
         unzip sonar-scanner.zip -d /opt
         echo "/opt/sonar-scanner-4.6.2.2472-linux/bin" >> $GITHUB_PATH  
 
-    
-    - name: Run SonarQube scan with debugging
-      run: |
-        sonar-scanner \
-          -Dsonar.projectKey=nodejs-project \
-          -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
-          -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
-          -Dsonar.sources=. \
-          -X  
+
 
 
 
