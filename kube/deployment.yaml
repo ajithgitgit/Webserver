@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
       - name: my-app
-        image: rtx3osie/myapp:${{ github.sha }}
+        image: rtx3osie/myapp:${GITHUB_SHA}  # Replace with GitHub SHA dynamically in the pipeline
         ports:
-        - containerPort: 3000
+        - containerPort: 3000  # Ensure this matches the targetPort in the Service
