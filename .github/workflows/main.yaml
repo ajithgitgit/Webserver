@@ -29,20 +29,7 @@ jobs:
       run: npm install  
 
     # Step 4: Install SonarQube Scanner
-    - name: Install SonarQube Scanner
-      run: |
-        curl -sSLo sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.6.2.2472-linux.zip
-        unzip sonar-scanner.zip -d /opt
-        echo "/opt/sonar-scanner-4.6.2.2472-linux/bin" >> $GITHUB_PATH
 
-    # Step 5: Run SonarQube scan (Ensure your SonarQube server and token are set as environment variables)
-    - name: Run SonarQube analysis
-      run: |
-        /opt/sonar-scanner-4.6.2.2472-linux/bin/sonar-scanner \
-          -Dsonar.projectKey=myapp \
-          -Dsonar.organization=myorg \
-          -Dsonar.host.url=https://sonarqube.example.com \
-          -Dsonar.login=$SONAR_TOKEN
 
     # Step 6: Build and push Docker image
     - name: Build and push Docker image
