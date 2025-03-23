@@ -1,7 +1,7 @@
 name: Enhanced CI/CD Pipeline with Integrated Security & Compliance
 
 permissions:
-  security-events: write 
+  security-events: write
 
 on:
   push:
@@ -19,7 +19,6 @@ jobs:
       with:
         fetch-depth: 0  
 
-    
     - name: Set up Node.js environment
       uses: actions/setup-node@v2
       with:
@@ -29,43 +28,45 @@ jobs:
     - name: Install npm dependencies
       run: npm install  
 
-  
+    # Step 4: Install SonarQube Scanner
     - name: Install SonarQube Scanner
       run: |
         curl -sSLo sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.6.2.2472-linux.zip
         unzip sonar-scanner.zip -d /opt
-        echo "/opt/sonar-scanner-4.6.2.2472-linux/bin" >> $GITHUB_PATH  
+        echo "/opt/sonar-scanner-4.6.2.2472-linux/bin" >> $GITHUB_PATH
 
+    # Step 5: Run SonarQube scan (Ensure your SonarQube server and token are set as environment variables)
+    - name: Run SonarQube analysis
+      run: |
+        /opt/sonar-scanner-4.6.2.2472-linux/bin/sonar-scanner \
+          -Dsonar.projectKey=myapp \
+          -Dsonar.organization=myorg \
+          -Dsonar.host.url=https://sonarqube.example.com \
+          -Dsonar.login=$SONAR_TOKEN
 
-
-
-
-    
+    # Step 6: Build and push Docker image
     - name: Build and push Docker image
       run: |
-        docker buildx create --use  
-        docker buildx build --platform linux/amd64,linux/arm64 -t myapp:latest .  
-        docker tag myapp:latest rtx3osie/myapp:latest  
-        docker push rtx3osie/myapp:latest  
+        docker buildx create --use
+        docker buildx build --platform linux/amd64,linux/arm64 -t myapp:latest .
+        docker tag myapp:latest rtx3osie/myapp:latest
+        docker push rtx3osie/myapp:latest
 
-    
+    # Step 7: Run Trivy vulnerability scan on Docker image
     - name: Run Trivy vulnerability scan on Docker image
       uses: aquasecurity/trivy-action@0.20.0
       with:
-        image-ref: 'rtx3osie/myapp:latest'  
+        image-ref: 'rtx3osie/myapp:latest'
         format: 'sarif'  # SARIF format for scan results
-        output: 'trivy-results.sarif'  
+        output: 'trivy-results.sarif'
 
-    
+    # Step 8: Upload Trivy SARIF Report to GitHub
     - name: Upload Trivy SARIF Report to GitHub
       uses: github/codeql-action/upload-sarif@v3
       with:
         sarif_file: 'trivy-results.sarif'
 
-    
+    # Step 9: Replace image tag in Kubernetes deployment YAML
     - name: Replace image tag in Kubernetes deployment YAML
       run: |
         sed -i "s|rtx3osie/myapp:PLACEHOLDER|rtx3osie/myapp:latest|" ./kube/deployment.yaml
-        cat ./kube/deployment.yaml  
-
-
