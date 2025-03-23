@@ -18,25 +18,34 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    # Step 2: Set up Docker Buildx (to build multi-platform images)
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v1
-
-    # Step 3: Log in to DockerHub
-    - name: Log in to DockerHub
-      uses: docker/login-action@v2
+    # Step 2: Set up Node.js (npm)
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
       with:
-        username: ${{ secrets.DOCKER_USERNAME }}  # Store DockerHub username in GitHub Secrets
-        password: ${{ secrets.DOCKER_PASSWORD }}  # Store DockerHub password in GitHub Secrets
+        node-version: '14'  # Replace with your preferred Node.js version
 
-    # Step 4: Build Docker image
+    # Step 3: Install npm dependencies
+    - name: Install dependencies
+      run: npm install
+
+    # Step 4: Run SonarQube analysis
+    - name: SonarQube Scan
+      uses: sonarsource/sonarcloud-github-action@v1
+      with:
+        entryPoint: npm
+        args: run sonar
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
+    # Step 5: Build Docker image
     - name: Build Docker image
       run: |
         docker build -t myapp:latest .  # Tagging with 'latest'
         docker tag myapp:latest rtx3osie/myapp:latest  # Push image with 'latest' tag
         docker push rtx3osie/myapp:latest  # Push image to Docker Hub
 
-    # Step 5: Run Trivy Docker image scan
+    # Step 6: Run Trivy Docker image scan
     - name: Run Trivy Docker scan
       uses: aquasecurity/trivy-action@0.20.0
       with:
@@ -44,26 +53,17 @@ jobs:
         format: 'sarif'  # SARIF format for scan results
         output: 'trivy-results.sarif'  # Output file for the SARIF results
 
-    # Step 6: Upload Trivy SARIF Report (Using CodeQL Action v3)
+    # Step 7: Upload Trivy SARIF Report (Using CodeQL Action v3)
     - name: Upload Trivy SARIF Report
       uses: github/codeql-action/upload-sarif@v3  # Updated to v3
       with:
         sarif_file: 'trivy-results.sarif'
 
-    # Step 7: Replace image tag in Deployment YAML with 'latest'
+    # Step 8: Replace image tag in Deployment YAML with 'latest'
     - name: Replace image tag in Deployment YAML
       run: |
         sed -i "s|rtx3osie/myapp:PLACEHOLDER|rtx3osie/myapp:latest|" ./kube/deployment.yaml
         cat ./kube/deployment.yaml  # Debug: Print the YAML file to check image tag replacement
 
-    # Step 8: SonarQube Scan (Perform static code analysis)
-    - name: Run SonarQube Static Code Analysis
-      uses: sonarsource/sonarcloud-github-action@v1
-      with:
-        entryPoint: ./gradlew  # Adjust this to your build command (e.g., gradle, mvn, npm)
-        args: -Dsonar.projectKey=my-app -Dsonar.projectName="My App"  # Replace with your SonarQube project key and name
-      env:
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}  # Your SonarQube token
-        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}  # Your SonarQube host URL
-
+    # Step 9: Deploy to Kubernetes (if applicable, assume kubectl is set up)
 
