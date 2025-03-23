@@ -1,6 +1,6 @@
 name: CI/CD Pipeline with Security & Compliance
 
-# Set the permissions for the workflow
+# Set the permissions for the workflow###
 permissions:
   security-events: write  # Grant permission for security event uploads
 
