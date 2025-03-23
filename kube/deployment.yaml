@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: my-app
+  namespace: server  # Specify the namespace here
   labels:
     app: my-app
 spec:
@@ -15,7 +16,7 @@ spec:
         app: my-app
     spec:
       containers:
-      - name: my-app
-        image: rtx3osie/myapp:${GITHUB_SHA}  # Replace with GitHub SHA dynamically in the pipeline
-        ports:
-        - containerPort: 3000  # Ensure this matches the targetPort in the Service
+        - name: my-app
+          image: rtx3osie/myapp:${GITHUB_SHA}  # Use the dynamically created image tag
+          ports:
+            - containerPort: 3000
