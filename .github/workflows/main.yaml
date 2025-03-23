@@ -30,7 +30,7 @@ jobs:
 
     # Step 4: Run Snyk Code (DeepCode) Scan
     - name: Run Snyk Code (DeepCode) Scan
-      uses: snyk/actions/nodejs@master  # GitHub Action to run Snyk Code (DeepCode)
+      uses: snyk/actions@v2  # Use the correct Snyk GitHub Action
       with:
         snyk-token: ${{ secrets.SNYK_TOKEN }}  # Pass your Snyk token stored in GitHub secrets
         command: "test"  # Run the test command to start the analysis
