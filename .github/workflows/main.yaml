@@ -22,7 +22,7 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v2
       with:
-        node-version: '14'  # Use Node.js version 14
+        node-version: '14'  # Use Node.js version 14 or your desired version
 
     # Step 3: Install npm dependencies
     - name: Install dependencies
@@ -33,7 +33,7 @@ jobs:
       uses: sonarsource/sonarcloud-github-action@v1
       with:
         entryPoint: npm
-        args: run sonar
+        args: run sonar  # Ensure you have a "sonar" script in package.json if running `npm run sonar`
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
