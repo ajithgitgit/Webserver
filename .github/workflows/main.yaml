@@ -35,14 +35,19 @@ jobs:
         unzip sonar-scanner.zip -d /opt
         echo "/opt/sonar-scanner-4.6.2.2472-linux/bin" >> $GITHUB_PATH  # Add sonar-scanner to PATH
 
-    # Step 5: Run SonarQube analysis
+    # Step 5: Run SonarQube analysis with debug logging enabled
     - name: Run SonarQube Scan
       run: |
         sonar-scanner \
           -Dsonar.projectKey=Webserver \
           -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
           -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
-          -Dsonar.sources=.
+          -Dsonar.sources=. \
+          -X  # Enable debug logging with the '-X' flag
+          
+      # If you want to explicitly add args, you can do it like this:
+      # with:
+      #   args: -X  # Enable debug mode for SonarQube scan
 
     # Step 6: Build Docker image
     - name: Build Docker image
@@ -70,4 +75,3 @@ jobs:
       run: |
         sed -i "s|rtx3osie/myapp:PLACEHOLDER|rtx3osie/myapp:latest|" ./kube/deployment.yaml
         cat ./kube/deployment.yaml  # Debug: Print the YAML file to check image tag replacement
-
