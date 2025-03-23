@@ -35,7 +35,7 @@ jobs:
     - name: Build and push Docker image
       run: |
         docker buildx create --use
-        docker buildx build --platform linux/amd64,linux/arm64 -t myapp:latest .
+        docker buildx build --platform linux/amd64,linux/arm64 -t myapp:latest . --push
         docker tag myapp:latest rtx3osie/myapp:latest
         docker push rtx3osie/myapp:latest
 
@@ -57,3 +57,4 @@ jobs:
     - name: Replace image tag in Kubernetes deployment YAML
       run: |
         sed -i "s|rtx3osie/myapp:PLACEHOLDER|rtx3osie/myapp:latest|" ./kube/deployment.yaml
+        cat ./kube/deployment.yaml
