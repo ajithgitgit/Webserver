@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main  # Trigger pipeline when code is pushed to the 'main' branch
-###
+
 jobs:
   build_and_scan:
     runs-on: ubuntu-latest  # Use the latest Ubuntu runner for the job
@@ -39,8 +39,6 @@ jobs:
     # Step 6: Replace image tag in Deployment YAML with $GITHUB_SHA
     - name: Replace image tag in Deployment YAML
       run: |
-        sed -i "s|rtx3osie/myapp:$GITHUB_SHA|" ./kube/deployment.yaml
+        sed -i "s|rtx3osie/myapp:PLACEHOLDER|rtx3osie/myapp:$GITHUB_SHA|" ./kube/deployment.yaml
         cat ./kube/deployment.yaml  # Debug: Print the YAML file to check image tag replacement
 
-    # Step 7: Apply Kubernetes deployment (if applicable, assume kubectl is set up)
-]
