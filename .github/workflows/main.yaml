@@ -44,10 +44,10 @@ jobs:
           -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
           -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
           -Dsonar.sources=. \
-          -Dsonar.exclusions=**/*.test.js,**/*.md \  # Skip test files and markdown files
-          -Dsonar.analysis.mode=preview \  # Run preview analysis (only changed code)
+          -Dsonar.exclusions="**/*.test.js,**/*.md"  # Skip test files and markdown files
+          -Dsonar.analysis.mode=preview  # Run preview analysis (only changed code)
           -X  # Enable debug logging for deeper insights
-          
+
     # Step 6: Run SonarQube Quality Gate Check
     - name: Check SonarQube Quality Gate
       uses: sonarsource/sonarqube-quality-gate-action@master
