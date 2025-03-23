@@ -32,15 +32,12 @@ jobs:
         docker tag myapp:$GITHUB_SHA rtx3osie/myapp:$GITHUB_SHA
         docker push rtx3osie/myapp:$GITHUB_SHA  # Push image to Docker Hub
 
-    # Step 5: Run Container Vulnerability Scanning (Trivy) if environment is 'prod'
-    - name: Run Trivy vulnerability scan
+    # Step 5: Replace image tag in Deployment YAML with $GITHUB_SHA
+    - name: Replace image tag in Deployment YAML
       run: |
-        if [ "${{ github.ref }}" == "refs/heads/main" ]; then
-          trivy image rtx3osie/myapp:$GITHUB_SHA
-        fi
-      continue-on-error: true  # Continue the pipeline even if vulnerabilities are found (you can add remediation here)
+        sed -i 's|PLACEHOLDER|rtx3osie/myapp:$GITHUB_SHA|' ./k8s/deployment.yaml
 
-    # Step 6: Helm Deploy to Kubernetes on EKS
-    - name: Helm Deploy to Kubernetes
+    # Step 6: Deploy to Kubernetes using kubectl
+    - name: Deploy to Kubernetes
       run: |
-        helm upgrade --install myapp ./helm-chart --set image.tag=$GITHUB_SHA  # Use the latest commit SHA for the image
+        kubectl apply -f ./k8s/deployment.yaml  # Apply the updated deployment file
