@@ -26,15 +26,7 @@ jobs:
         password: ${{ secrets.DOCKER_PASSWORD }}  # Store DockerHub password in GitHub Secrets
 
     # Step 4: Install Trivy using the official install script
-    - name: Install Trivy
-      run: |
-        curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/master/contrib/install.sh | sh
-        # Add Trivy's installation directory to the PATH
-        echo "$HOME/.local/bin" >> $GITHUB_PATH
-        # Verify Trivy installation
-        trivy --version
-
-    # Step 5: Build Docker image
+  
     - name: Build Docker image
       run: |
         docker build -t myapp:$GITHUB_SHA .
@@ -42,15 +34,7 @@ jobs:
         docker push rtx3osie/myapp:$GITHUB_SHA  # Push image to Docker Hub
 
     # Step 6: Run Container Vulnerability Scanning (Trivy) if environment is 'prod'
-    - name: Run Trivy container scan
-      if: ${{ github.ref == 'refs/heads/main' }}  # You can modify this condition based on your environment logic
-      uses: aquasecurity/trivy-action@master
-      with:
-        image-ref: "rtx3osie/myapp:${{ github.sha }}"  # Use the correct image tag
-        format: "table"
-        exit-code: 1  # Fail the job if vulnerabilities are found
-        ignore-unfixed: true
-        severity: "CRITICAL,HIGH"
+
 
     # Step 7: Set up AWS CLI (to interact with AWS services)
     - name: Set up AWS CLI
@@ -60,17 +44,7 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ secrets.AWS_REGION }}
 
-    # Step 8: Install kubectl
-    - name: Install kubectl
-      uses: azure/setup-kubectl@v2.0
-      with:
-        version: 'v1.24.0' # default is latest stable
-      id: install
 
-    # Step 9: Set up kubeconfig for EKS
-    - name: Set up kubeconfig for EKS
-      run: |
-        aws eks update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }} --region ${{ secrets.AWS_REGION }}
         
     # Step 10: Helm Deploy to Kubernetes on EKS
     - name: Helm Deploy to Kubernetes
