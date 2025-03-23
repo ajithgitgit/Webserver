@@ -22,11 +22,11 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v2
       with:
-        node-version: '14'  # Replace with your preferred Node.js version
+        node-version: '14'  # Use Node.js version 14
 
     # Step 3: Install npm dependencies
     - name: Install dependencies
-      run: npm install
+      run: npm install  # Ensure dependencies are installed
 
     # Step 4: Run SonarQube analysis
     - name: SonarQube Scan
@@ -66,4 +66,3 @@ jobs:
         cat ./kube/deployment.yaml  # Debug: Print the YAML file to check image tag replacement
 
     # Step 9: Deploy to Kubernetes (if applicable, assume kubectl is set up)
-
