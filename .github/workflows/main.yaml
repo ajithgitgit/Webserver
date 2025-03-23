@@ -1,42 +1,42 @@
-name: CI/CD Pipeline with Security & Compliance
+name: Enhanced CI/CD Pipeline with Integrated Security & Compliance
 
 permissions:
-  security-events: write  # Grant permission for security event uploads
+  security-events: write 
 
 on:
   push:
     branches:
-      - main  # Trigger pipeline when code is pushed to the 'main' branch
+      - main  
 
 jobs:
   build_and_scan:
-    runs-on: ubuntu-latest  # Use the latest Ubuntu runner for the job
+    runs-on: ubuntu-latest  
 
     steps:
-    # Step 1: Checkout code
+    
     - name: Checkout code from repository
       uses: actions/checkout@v2
       with:
-        fetch-depth: 0  # Full history for better SonarQube analysis relevance
+        fetch-depth: 0  
 
-    # Step 2: Set up Node.js (npm)
+    
     - name: Set up Node.js environment
       uses: actions/setup-node@v2
       with:
-        node-version: '14'  # Set Node.js version 14
+        node-version: '14'  
 
     # Step 3: Install npm dependencies
     - name: Install npm dependencies
-      run: npm install  # Ensure all dependencies are installed
+      run: npm install  
 
-    # Step 4: Install SonarQube Scanner for code analysis
+  
     - name: Install SonarQube Scanner
       run: |
         curl -sSLo sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.6.2.2472-linux.zip
         unzip sonar-scanner.zip -d /opt
-        echo "/opt/sonar-scanner-4.6.2.2472-linux/bin" >> $GITHUB_PATH  # Add sonar-scanner to PATH
+        echo "/opt/sonar-scanner-4.6.2.2472-linux/bin" >> $GITHUB_PATH  
 
-    # Step 5: Run SonarQube Analysis
+    
     - name: Run SonarQube scan with debugging
       run: |
         sonar-scanner \
@@ -44,40 +44,40 @@ jobs:
           -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
           -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
           -Dsonar.sources=. \
-          -X  # Enable debug logging for deeper insights into analysis
+          -X  
 
 
 
-    # Step 7: Build Docker image with multi-platform support
+    
     - name: Build and push Docker image
       run: |
-        docker buildx create --use  # Enable buildx for multi-platform support
-        docker buildx build --platform linux/amd64,linux/arm64 -t myapp:latest .  # Build for multiple platforms
-        docker tag myapp:latest rtx3osie/myapp:latest  # Tagging with 'latest'
-        docker push rtx3osie/myapp:latest  # Push image to Docker Hub
+        docker buildx create --use  
+        docker buildx build --platform linux/amd64,linux/arm64 -t myapp:latest .  
+        docker tag myapp:latest rtx3osie/myapp:latest  
+        docker push rtx3osie/myapp:latest  
 
-    # Step 8: Run Trivy Docker image vulnerability scan
+    
     - name: Run Trivy vulnerability scan on Docker image
       uses: aquasecurity/trivy-action@0.20.0
       with:
-        image-ref: 'rtx3osie/myapp:latest'  # Image to be scanned
+        image-ref: 'rtx3osie/myapp:latest'  
         format: 'sarif'  # SARIF format for scan results
-        output: 'trivy-results.sarif'  # Output file for the SARIF results
+        output: 'trivy-results.sarif'  
 
-    # Step 9: Upload Trivy SARIF Report for code analysis
+    
     - name: Upload Trivy SARIF Report to GitHub
       uses: github/codeql-action/upload-sarif@v3
       with:
         sarif_file: 'trivy-results.sarif'
 
-    # Step 10: Replace image tag in Kubernetes Deployment YAML
+    
     - name: Replace image tag in Kubernetes deployment YAML
       run: |
         sed -i "s|rtx3osie/myapp:PLACEHOLDER|rtx3osie/myapp:latest|" ./kube/deployment.yaml
-        cat ./kube/deployment.yaml  # Debug: Print the updated YAML file to verify image tag replacement
+        cat ./kube/deployment.yaml  
 
-    # Optional: Deploy to Kubernetes (Using Helm or kubectl)
+    
     - name: Deploy to Kubernetes cluster
       run: |
-        # Example using Helm to deploy the application
-        helm upgrade --install myapp ./kube --set image.tag=latest  # Use Helm to manage Kubernetes deployments
+        
+        helm upgrade --install myapp ./kube --set image.tag=latest  
