@@ -7,6 +7,6 @@ spec:
     app: my-app
   ports:
     - protocol: TCP
-      port: 80
-      targetPort: 80
-  type: LoadBalancer
+      port: 80        # External port to access the service
+      targetPort: 3000 # Container's port exposed internally
+  type: LoadBalancer  # This will create a load balancer in cloud environments like AWS, GCP, or Azure
