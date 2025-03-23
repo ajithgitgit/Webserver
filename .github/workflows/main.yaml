@@ -25,28 +25,22 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}  # Store DockerHub username in GitHub Secrets
         password: ${{ secrets.DOCKER_PASSWORD }}  # Store DockerHub password in GitHub Secrets
 
-    # Step 4: Install Trivy using the official install script
-  
+    # Step 4: Build Docker image
     - name: Build Docker image
       run: |
         docker build -t myapp:$GITHUB_SHA .
         docker tag myapp:$GITHUB_SHA rtx3osie/myapp:$GITHUB_SHA
         docker push rtx3osie/myapp:$GITHUB_SHA  # Push image to Docker Hub
 
-    # Step 6: Run Container Vulnerability Scanning (Trivy) if environment is 'prod'
+    # Step 5: Run Container Vulnerability Scanning (Trivy) if environment is 'prod'
+    - name: Run Trivy vulnerability scan
+      run: |
+        if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+          trivy image rtx3osie/myapp:$GITHUB_SHA
+        fi
+      continue-on-error: true  # Continue the pipeline even if vulnerabilities are found (you can add remediation here)
 
-
-    # Step 7: Set up AWS CLI (to interact with AWS services)
-    - name: Set up AWS CLI
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ secrets.AWS_REGION }}
-
-
-        
-    # Step 10: Helm Deploy to Kubernetes on EKS
+    # Step 6: Helm Deploy to Kubernetes on EKS
     - name: Helm Deploy to Kubernetes
       run: |
-        helm upgrade --install myapp ./helm-chart --set image.tag=$GITHUB_SHA
+        helm upgrade --install myapp ./helm-chart --set image.tag=$GITHUB_SHA  # Use the latest commit SHA for the image
