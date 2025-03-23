@@ -28,17 +28,21 @@ jobs:
     - name: Install dependencies
       run: npm install  # Ensure dependencies are installed
 
-    # Step 4: Run SonarQube analysis
-    - name: SonarQube Scan
-      uses: sonarsource/sonarcloud-github-action@v1
-      with:
-        entryPoint: npm
-        args: run sonar  # Ensure you have a "sonar" script in package.json if running `npm run sonar`
-      env:
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}  # SonarQube token stored in GitHub secrets
-        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}  # SonarQube server URL (e.g., https://sonar.yourcompany.com)
+    # Step 4: Install SonarQube Scanner
+    - name: Install SonarQube Scanner
+      run: |
+        curl -sSLo sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.6.2.2472-linux.zip
+        unzip sonar-scanner.zip -d /opt
+        echo "/opt/sonar-scanner-4.6.2.2472-linux/bin" >> $GITHUB_PATH  # Add sonar-scanner to PATH
 
-
+    # Step 5: Run SonarQube analysis
+    - name: Run SonarQube Scan
+      run: |
+        sonar-scanner \
+          -Dsonar.projectKey=Webserver \
+          -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
+          -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
+          -Dsonar.sources=.
 
     # Step 6: Build Docker image
     - name: Build Docker image
@@ -66,3 +70,4 @@ jobs:
       run: |
         sed -i "s|rtx3osie/myapp:PLACEHOLDER|rtx3osie/myapp:latest|" ./kube/deployment.yaml
         cat ./kube/deployment.yaml  # Debug: Print the YAML file to check image tag replacement
+
