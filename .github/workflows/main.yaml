@@ -35,9 +35,5 @@ jobs:
     # Step 5: Replace image tag in Deployment YAML with $GITHUB_SHA
     - name: Replace image tag in Deployment YAML
       run: |
-        sed -i 's|PLACEHOLDER|rtx3osie/myapp:$GITHUB_SHA|' ./k8s/deployment.yaml
+        sed -i 's|PLACEHOLDER|rtx3osie/myapp:$GITHUB_SHA|' ./kube/deployment.yaml
 
-    # Step 6: Deploy to Kubernetes using kubectl
-    - name: Deploy to Kubernetes
-      run: |
-        kubectl apply -f ./k8s/deployment.yaml  # Apply the updated deployment file
