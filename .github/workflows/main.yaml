@@ -28,7 +28,17 @@ jobs:
     - name: Install dependencies
       run: npm install  # Ensure dependencies are installed
 
-    # Step 4: Run Snyk Code (DeepCode) Scan
+    # Step 4: Run SonarQube analysis
+    - name: SonarQube Scan
+      uses: sonarsource/sonarcloud-github-action@v1
+      with:
+        entryPoint: npm
+        args: run sonar  # Ensure you have a "sonar" script in package.json if running `npm run sonar`
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}  # SonarQube token stored in GitHub secrets
+        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}  # SonarQube server URL (e.g., https://sonar.yourcompany.com)
+
+    # Step 5: Run Snyk Code (DeepCode) Scan
     - name: Run Snyk Code (DeepCode) Scan
       uses: snyk/actions@v2  # Use the correct Snyk GitHub Action
       with:
@@ -37,14 +47,14 @@ jobs:
       env:
         SNYK_ORG: ${{ secrets.SNYK_ORG }}  # (Optional) Pass your Snyk Organization ID if needed
 
-    # Step 5: Build Docker image
+    # Step 6: Build Docker image
     - name: Build Docker image
       run: |
         docker build -t myapp:latest .  # Tagging with 'latest'
         docker tag myapp:latest rtx3osie/myapp:latest  # Push image with 'latest' tag
         docker push rtx3osie/myapp:latest  # Push image to Docker Hub
 
-    # Step 6: Run Trivy Docker image scan
+    # Step 7: Run Trivy Docker image scan
     - name: Run Trivy Docker scan
       uses: aquasecurity/trivy-action@0.20.0
       with:
@@ -52,16 +62,14 @@ jobs:
         format: 'sarif'  # SARIF format for scan results
         output: 'trivy-results.sarif'  # Output file for the SARIF results
 
-    # Step 7: Upload Trivy SARIF Report (Using CodeQL Action v3)
+    # Step 8: Upload Trivy SARIF Report (Using CodeQL Action v3)
     - name: Upload Trivy SARIF Report
       uses: github/codeql-action/upload-sarif@v3  # Updated to v3
       with:
         sarif_file: 'trivy-results.sarif'
 
-    # Step 8: Replace image tag in Deployment YAML with 'latest'
+    # Step 9: Replace image tag in Deployment YAML with 'latest'
     - name: Replace image tag in Deployment YAML
       run: |
         sed -i "s|rtx3osie/myapp:PLACEHOLDER|rtx3osie/myapp:latest|" ./kube/deployment.yaml
         cat ./kube/deployment.yaml  # Debug: Print the YAML file to check image tag replacement
-
-    # Step 9: Deploy to Kubernetes (if applicable, assume kubectl is set up)
