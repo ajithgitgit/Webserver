@@ -61,7 +61,7 @@ jobs:
       uses: sonarsource/sonarcloud-github-action@v1
       with:
         sonar-token: ${{ secrets.SONAR_TOKEN }}  # Your SonarQube token
-        sonar-project-key: sqp_6fa7932a50306550d2bba277c7e4effc7f23f3b1  # Replace with your SonarQube project key
+        sonar-project-key: webserve  # Replace with your SonarQube project key
         sonar-project-name: "MyApp"  # Replace with your SonarQube project name
       env:
         SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}  # Your SonarQube instance URL
