@@ -1,10 +1,11 @@
 {
-  "name": "simple-node-app",
+  "name": "Webserver",
   "version": "1.0.0",
-  "description": "A simple Node.js app",
-  "main": "app.js",
+  "description": "A simple Webserver app",
+  "main": "index.js",
   "scripts": {
-    "start": "node app.js"
+    "start": "node index.js",
+    "sonar": "sonar-scanner"
   },
   "dependencies": {},
   "author": "",
