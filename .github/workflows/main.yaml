@@ -37,14 +37,7 @@ jobs:
         echo "/opt/sonar-scanner-4.6.2.2472-linux/bin" >> $GITHUB_PATH  # Add sonar-scanner to PATH
 
     # Step 5: Run SonarQube Analysis
-    - name: Run SonarQube scan with debugging
-      run: |
-        sonar-scanner \
-          -Dsonar.projectKey=nodejs-project \
-          -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
-          -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
-          -Dsonar.sources=. \
-          -X  # Enable debug logging for deeper insights into analysis
+ 
 
 
 
