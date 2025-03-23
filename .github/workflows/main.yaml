@@ -41,7 +41,7 @@ jobs:
     - name: Run SonarQube Scan
       run: |
         sonar-scanner \
-          -Dsonar.projectKey=Webserver \
+          -Dsonar.projectKey=nodejs \
           -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
           -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
           -Dsonar.sources=. \
