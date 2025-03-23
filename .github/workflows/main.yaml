@@ -68,8 +68,4 @@ jobs:
         sed -i "s|rtx3osie/myapp:PLACEHOLDER|rtx3osie/myapp:latest|" ./kube/deployment.yaml
         cat ./kube/deployment.yaml  
 
-    
-    - name: Deploy to Kubernetes cluster
-      run: |
-        
-        helm upgrade --install myapp ./kube --set image.tag=latest  
+
