@@ -28,17 +28,14 @@ jobs:
     # Step 4: Build Docker image
     - name: Build Docker image
       run: |
-        docker build -t myapp:$GITHUB_SHA .
-        docker tag myapp:$GITHUB_SHA rtx3osie/myapp:$GITHUB_SHA
-        docker push rtx3osie/myapp:$GITHUB_SHA  # Push image to Docker Hub
+        docker build -t myapp:latest .  # Tagging with 'latest'
+        docker tag myapp:latest rtx3osie/myapp:latest  # Push image with 'latest' tag
+        docker push rtx3osie/myapp:latest  # Push image to Docker Hub
 
-    # Step 5: Show GitHub SHA (debugging step)
-    - name: Show GitHub SHA
-      run: echo "GitHub SHA is $GITHUB_SHA"
-
-    # Step 6: Replace image tag in Deployment YAML with $GITHUB_SHA
+    # Step 5: Replace image tag in Deployment YAML with 'latest'
     - name: Replace image tag in Deployment YAML
       run: |
-        sed -i "s|rtx3osie/myapp:PLACEHOLDER|rtx3osie/myapp:$GITHUB_SHA|" ./kube/deployment.yaml
+        sed -i "s|rtx3osie/myapp:PLACEHOLDER|rtx3osie/myapp:latest|" ./kube/deployment.yaml
         cat ./kube/deployment.yaml  # Debug: Print the YAML file to check image tag replacement
 
+ 
